@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.CHAT_BACKEND_URL ?? "http://localhost:8001";
+// Supports both old CHAT_BACKEND_URL and new TRIAGE_URL / CONCEPTS_URL from .env.local
+const BACKEND_URL =
+  process.env.TRIAGE_URL ??
+  process.env.CONCEPTS_URL ??
+  process.env.CHAT_BACKEND_URL ??
+  "http://localhost:8001";
 
 // Simple demo responses keyed on keywords in the user message
 function demoReply(message: string): string {

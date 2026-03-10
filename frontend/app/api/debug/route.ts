@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.DEBUG_BACKEND_URL ?? "http://localhost:8003";
+const BACKEND_URL =
+  process.env.DEBUG_URL ??
+  process.env.DEBUG_BACKEND_URL ??
+  "http://localhost:8001";
 
 interface Issue {
   severity: "error" | "warning" | "info";
