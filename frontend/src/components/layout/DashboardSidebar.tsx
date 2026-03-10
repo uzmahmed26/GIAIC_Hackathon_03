@@ -15,7 +15,7 @@ const NAV_ITEMS = [
 
 const currentModule = MODULES.find((m) => m.status === "in-progress") ?? MODULES[2];
 
-export default function DashboardSidebar() {
+export default function DashboardSidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const user = getSession();
@@ -27,15 +27,27 @@ export default function DashboardSidebar() {
 
   return (
     <aside
-      className="flex w-64 shrink-0 flex-col border-r"
+      className="flex h-full w-64 shrink-0 flex-col border-r"
       style={{ background: "#181825", borderColor: "#313244" }}
     >
       {/* Brand */}
-      <div className="flex items-center gap-3 px-5 py-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg text-sm" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
-          🐍
+      <div className="flex items-center justify-between px-5 py-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg text-sm" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
+            🐍
+          </div>
+          <span className="text-base font-bold" style={{ color: "#cba6f7" }}>LearnFlow</span>
         </div>
-        <span className="text-base font-bold" style={{ color: "#cba6f7" }}>LearnFlow</span>
+        {/* Close button — mobile only */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-lg md:hidden"
+            style={{ color: "#6c7086" }}
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* User card */}

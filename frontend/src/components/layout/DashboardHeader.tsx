@@ -19,7 +19,7 @@ const NOTIFICATIONS = [
   { id: 3, text: "Sofia Garcia overtook you in XP", time: "3h ago", read: true },
 ];
 
-export default function DashboardHeader() {
+export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const user = getSession();
@@ -29,6 +29,8 @@ export default function DashboardHeader() {
   const [unread, setUnread] = useState(NOTIFICATIONS.filter((n) => !n.read).length);
 
   const breadcrumbs = BREADCRUMB_MAP[pathname] ?? ["Dashboard"];
+  // On mobile just show the last crumb to save space
+  const currentPage = breadcrumbs[breadcrumbs.length - 1];
 
   useEffect(() => {
     function close() { setShowNotifications(false); setShowUserMenu(false); }
@@ -38,25 +40,45 @@ export default function DashboardHeader() {
 
   return (
     <header
-      className="flex h-14 shrink-0 items-center justify-between border-b px-6"
+      className="flex h-14 shrink-0 items-center justify-between border-b px-3 md:px-6"
       style={{ background: "#181825", borderColor: "#313244" }}
     >
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm">
-        {breadcrumbs.map((crumb, i) => (
-          <span key={crumb} className="flex items-center gap-2">
-            {i > 0 && <span style={{ color: "#45475a" }}>/</span>}
-            <span style={{ color: i === breadcrumbs.length - 1 ? "#cdd6f4" : "#6c7086" }}>{crumb}</span>
-          </span>
-        ))}
-      </nav>
+      {/* Left: hamburger (mobile) + breadcrumb */}
+      <div className="flex items-center gap-2 min-w-0">
+        {/* Hamburger — mobile only */}
+        <button
+          onClick={onMenuClick}
+          className="flex h-8 w-8 shrink-0 flex-col items-center justify-center gap-1.5 rounded-lg transition-all md:hidden"
+          style={{ color: "#a6adc8" }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "#313244")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+          aria-label="Open menu"
+        >
+          <span className="h-0.5 w-4 rounded-full" style={{ background: "currentColor" }} />
+          <span className="h-0.5 w-4 rounded-full" style={{ background: "currentColor" }} />
+          <span className="h-0.5 w-3 rounded-full" style={{ background: "currentColor" }} />
+        </button>
+
+        {/* Full breadcrumb — desktop */}
+        <nav className="hidden items-center gap-2 text-sm md:flex">
+          {breadcrumbs.map((crumb, i) => (
+            <span key={crumb} className="flex items-center gap-2">
+              {i > 0 && <span style={{ color: "#45475a" }}>/</span>}
+              <span style={{ color: i === breadcrumbs.length - 1 ? "#cdd6f4" : "#6c7086" }}>{crumb}</span>
+            </span>
+          ))}
+        </nav>
+
+        {/* Current page only — mobile */}
+        <span className="truncate text-sm font-medium md:hidden" style={{ color: "#cdd6f4" }}>{currentPage}</span>
+      </div>
 
       {/* Right side controls */}
-      <div className="flex items-center gap-2">
-        {/* Dark/Light toggle */}
+      <div className="flex items-center gap-1 md:gap-2">
+        {/* Theme toggle — hidden on mobile to save space */}
         <button
           onClick={() => setDark(!dark)}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-all"
+          className="hidden h-8 w-8 items-center justify-center rounded-lg text-sm transition-all md:flex"
           style={{ color: "#6c7086" }}
           onMouseEnter={(e) => { (e.currentTarget.style.background = "#313244"); (e.currentTarget.style.color = "#cdd6f4"); }}
           onMouseLeave={(e) => { (e.currentTarget.style.background = "transparent"); (e.currentTarget.style.color = "#6c7086"); }}
@@ -83,7 +105,10 @@ export default function DashboardHeader() {
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 top-10 z-50 w-80 rounded-2xl border shadow-2xl animate-fade-in" style={{ background: "#181825", borderColor: "#313244" }}>
+            <div
+              className="absolute right-0 top-10 z-50 rounded-2xl border shadow-2xl animate-fade-in"
+              style={{ background: "#181825", borderColor: "#313244", width: "min(320px, calc(100vw - 1.5rem))" }}
+            >
               <div className="flex items-center justify-between border-b px-4 py-3" style={{ borderColor: "#313244" }}>
                 <span className="text-sm font-semibold" style={{ color: "#cdd6f4" }}>Notifications</span>
                 <button onClick={() => setUnread(0)} className="text-xs" style={{ color: "#6366f1" }}>Mark all read</button>
@@ -114,8 +139,8 @@ export default function DashboardHeader() {
           {showUserMenu && (
             <div className="absolute right-0 top-10 z-50 w-48 rounded-2xl border shadow-2xl animate-fade-in" style={{ background: "#181825", borderColor: "#313244" }}>
               <div className="border-b px-4 py-3" style={{ borderColor: "#313244" }}>
-                <p className="text-sm font-semibold" style={{ color: "#cdd6f4" }}>{user?.name}</p>
-                <p className="text-xs" style={{ color: "#6c7086" }}>{user?.email}</p>
+                <p className="truncate text-sm font-semibold" style={{ color: "#cdd6f4" }}>{user?.name}</p>
+                <p className="truncate text-xs" style={{ color: "#6c7086" }}>{user?.email}</p>
               </div>
               {[
                 { label: "Profile", href: "/dashboard/settings" },
