@@ -1,0 +1,70 @@
+# ── Dapr pubsub component — Apache Kafka (Strimzi) ────────────────────────────
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: pubsub
+  namespace: learnflow
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+    - name: brokers
+      value: "learnflow-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092"
+    - name: consumerGroup
+      value: learnflow-agents
+    - name: authType
+      value: none
+    - name: initialOffset
+      value: newest
+    - name: maxMessageBytes
+      value: "1048576"
+---
+# ── Dapr statestore component — Redis ─────────────────────────────────────────
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: statestore
+  namespace: learnflow
+spec:
+  type: state.redis
+  version: v1
+  metadata:
+    - name: redisHost
+      value: "redis.learnflow.svc.cluster.local:6379"
+    - name: redisPassword
+      value: ""
+    - name: actorStateStore
+      value: "true"
+---
+# ── Dapr Resiliency — retry + circuit breaker ─────────────────────────────────
+apiVersion: dapr.io/v1alpha1
+kind: Resiliency
+metadata:
+  name: learnflow-resiliency
+  namespace: learnflow
+spec:
+  policies:
+    retries:
+      DefaultRetryPolicy:
+        policy: exponential
+        maxInterval: 30s
+        maxRetries: 3
+    circuitBreakers:
+      DefaultCircuitBreaker:
+        maxRequests: 1
+        interval: 30s
+        timeout: 60s
+        trip: consecutiveFailures >= 5
+  targets:
+    apps:
+      triage-agent:
+        retry: DefaultRetryPolicy
+        circuitBreaker: DefaultCircuitBreaker
+      concepts-agent:
+        retry: DefaultRetryPolicy
+      debug-agent:
+        retry: DefaultRetryPolicy
+      exercise-agent:
+        retry: DefaultRetryPolicy
+      progress-agent:
+        retry: DefaultRetryPolicy

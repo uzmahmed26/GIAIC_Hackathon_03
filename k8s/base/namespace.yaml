@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: learnflow
+  labels:
+    app.kubernetes.io/managed-by: kubectl
+    dapr.io/enabled: "true"

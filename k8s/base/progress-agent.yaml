@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: progress-agent
+  namespace: learnflow
+  labels:
+    app: progress-agent
+    version: "1.0.0"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: progress-agent
+  template:
+    metadata:
+      labels:
+        app: progress-agent
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "progress-agent"
+        dapr.io/app-port: "8005"
+        dapr.io/log-level: "info"
+        dapr.io/enable-api-logging: "true"
+        dapr.io/sidecar-cpu-request: "50m"
+        dapr.io/sidecar-memory-request: "64Mi"
+        dapr.io/sidecar-cpu-limit: "200m"
+        dapr.io/sidecar-memory-limit: "256Mi"
+    spec:
+      containers:
+        - name: progress-agent
+          image: learnflow/progress-agent:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8005
+              name: http
+          envFrom:
+            - secretRef:
+                name: learnflow-secrets
+          env:
+            - name: SERVICE_PORT
+              value: "8005"
+            - name: STRUGGLE_THRESHOLD
+              value: "3"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            initialDelaySeconds: 30
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: progress-agent
+  namespace: learnflow
+  labels:
+    app: progress-agent
+spec:
+  selector:
+    app: progress-agent
+  ports:
+    - port: 8005
+      targetPort: 8005
+      name: http

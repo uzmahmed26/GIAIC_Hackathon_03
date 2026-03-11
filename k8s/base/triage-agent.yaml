@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: triage-agent
+  namespace: learnflow
+  labels:
+    app: triage-agent
+    version: "1.0.0"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: triage-agent
+  template:
+    metadata:
+      labels:
+        app: triage-agent
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "triage-agent"
+        dapr.io/app-port: "8001"
+        dapr.io/log-level: "info"
+        dapr.io/enable-api-logging: "true"
+        dapr.io/sidecar-cpu-request: "50m"
+        dapr.io/sidecar-memory-request: "64Mi"
+        dapr.io/sidecar-cpu-limit: "200m"
+        dapr.io/sidecar-memory-limit: "256Mi"
+    spec:
+      containers:
+        - name: triage-agent
+          image: learnflow/triage-agent:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8001
+              name: http
+          envFrom:
+            - secretRef:
+                name: learnflow-secrets
+          env:
+            - name: SERVICE_PORT
+              value: "8001"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 30
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: triage-agent
+  namespace: learnflow
+  labels:
+    app: triage-agent
+spec:
+  selector:
+    app: triage-agent
+  ports:
+    - port: 8001
+      targetPort: 8001
+      name: http
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: triage-agent
+  namespace: learnflow
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: triage-agent
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
