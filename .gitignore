@@ -16,3 +16,13 @@ npm-debug.log*
 # Editor
 .vscode/
 .idea/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+*.egg-info/
+dist/
+.pytest_cache/
+.mypy_cache/
