@@ -6,10 +6,11 @@ import { login } from "@/src/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("maya@example.com");
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -28,8 +29,15 @@ export default function LoginPage() {
   }
 
   function handleGoogle() {
-    const user = login("maya@example.com", "any");
+    const user = login("uzma@example.com", "any");
     if (user) router.push("/dashboard");
+  }
+
+  function handleQuickLogin(role: "student" | "teacher") {
+    const e = role === "student" ? "uzma@example.com" : "john@example.com";
+    const user = login(e, "any");
+    if (!user) return;
+    router.push(user.role === "teacher" ? "/teacher" : "/dashboard");
   }
 
   return (
@@ -76,18 +84,31 @@ export default function LoginPage() {
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium" style={{ color: "#a6adc8" }}>Password</label>
-              <input
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="••••••••"
-                className="w-full rounded-xl px-4 py-3 text-base outline-none transition-all sm:text-sm"
-                style={{ background: "#313244", color: "#cdd6f4", border: "1px solid #45475a" }}
-                onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
-                onBlur={(e) => (e.target.style.borderColor = "#45475a")}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                  className="w-full rounded-xl px-4 py-3 pr-11 text-base outline-none transition-all sm:text-sm"
+                  style={{ background: "#313244", color: "#cdd6f4", border: "1px solid #45475a" }}
+                  onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
+                  onBlur={(e) => (e.target.style.borderColor = "#45475a")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-sm"
+                  style={{ color: "#6c7086" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#a6adc8")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#6c7086")}
+                  tabIndex={-1}
+                >
+                  {showPassword ? "🙈" : "👁"}
+                </button>
+              </div>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
               <label className="flex cursor-pointer items-center gap-2" style={{ color: "#a6adc8" }}>
@@ -136,10 +157,29 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <p className="mt-4 px-2 text-center text-xs leading-relaxed" style={{ color: "#45475a" }}>
-          Demo: maya@example.com (student)<br className="sm:hidden" />
-          {" · "}john@example.com (teacher)
-        </p>
+        <div className="mt-4 space-y-2">
+          <p className="text-center text-xs" style={{ color: "#45475a" }}>Quick demo login</p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleQuickLogin("student")}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-medium transition-all"
+              style={{ borderColor: "#313244", color: "#a6e3a1", background: "rgba(166,227,161,0.06)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(166,227,161,0.12)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(166,227,161,0.06)")}
+            >
+              🎓 Student
+            </button>
+            <button
+              onClick={() => handleQuickLogin("teacher")}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-medium transition-all"
+              style={{ borderColor: "#313244", color: "#89b4fa", background: "rgba(137,180,250,0.06)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(137,180,250,0.12)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(137,180,250,0.06)")}
+            >
+              👨‍🏫 Teacher
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
