@@ -1,0 +1,238 @@
+version: "3.9"
+
+services:
+  # ── Infrastructure ───────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: learnflow
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: learnflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U learnflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Dapr placement service ────────────────────────────────────────────────────
+  placement:
+    image: daprio/dapr:1.13.0
+    command: ["./placement", "-port", "50006"]
+    ports:
+      - "50006:50006"
+
+  # ── SERVICE 1: triage-agent ───────────────────────────────────────────────────
+  triage-agent:
+    build:
+      context: ./triage-agent
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      DATABASE_URL: postgresql://learnflow:password@postgres:5432/learnflow
+      DAPR_HTTP_PORT: 3501
+      PUBSUB_NAME: pubsub
+      SERVICE_PORT: 8001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  triage-agent-dapr:
+    image: daprio/daprd:1.13.0
+    command:
+      - "./daprd"
+      - "-app-id"
+      - "triage-agent"
+      - "-app-port"
+      - "8001"
+      - "-dapr-http-port"
+      - "3501"
+      - "-placement-host-address"
+      - "placement:50006"
+      - "-components-path"
+      - "/components"
+    volumes:
+      - ./dapr/components:/components
+    network_mode: "service:triage-agent"
+    depends_on:
+      - triage-agent
+      - placement
+
+  # ── SERVICE 2: concepts-agent ─────────────────────────────────────────────────
+  concepts-agent:
+    build:
+      context: ./concepts-agent
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      DATABASE_URL: postgresql://learnflow:password@postgres:5432/learnflow
+      DAPR_HTTP_PORT: 3502
+      PUBSUB_NAME: pubsub
+      SERVICE_PORT: 8002
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  concepts-agent-dapr:
+    image: daprio/daprd:1.13.0
+    command:
+      - "./daprd"
+      - "-app-id"
+      - "concepts-agent"
+      - "-app-port"
+      - "8002"
+      - "-dapr-http-port"
+      - "3502"
+      - "-placement-host-address"
+      - "placement:50006"
+      - "-components-path"
+      - "/components"
+    volumes:
+      - ./dapr/components:/components
+    network_mode: "service:concepts-agent"
+    depends_on:
+      - concepts-agent
+      - placement
+
+  # ── SERVICE 3: debug-agent ────────────────────────────────────────────────────
+  debug-agent:
+    build:
+      context: ./debug-agent
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      DATABASE_URL: postgresql://learnflow:password@postgres:5432/learnflow
+      DAPR_HTTP_PORT: 3503
+      PUBSUB_NAME: pubsub
+      SERVICE_PORT: 8003
+      STRUGGLE_THRESHOLD: 3
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  debug-agent-dapr:
+    image: daprio/daprd:1.13.0
+    command:
+      - "./daprd"
+      - "-app-id"
+      - "debug-agent"
+      - "-app-port"
+      - "8003"
+      - "-dapr-http-port"
+      - "3503"
+      - "-placement-host-address"
+      - "placement:50006"
+      - "-components-path"
+      - "/components"
+    volumes:
+      - ./dapr/components:/components
+    network_mode: "service:debug-agent"
+    depends_on:
+      - debug-agent
+      - placement
+
+  # ── SERVICE 4: exercise-agent ─────────────────────────────────────────────────
+  exercise-agent:
+    build:
+      context: ./exercise-agent
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8004"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      DATABASE_URL: postgresql://learnflow:password@postgres:5432/learnflow
+      DAPR_HTTP_PORT: 3504
+      PUBSUB_NAME: pubsub
+      SERVICE_PORT: 8004
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  exercise-agent-dapr:
+    image: daprio/daprd:1.13.0
+    command:
+      - "./daprd"
+      - "-app-id"
+      - "exercise-agent"
+      - "-app-port"
+      - "8004"
+      - "-dapr-http-port"
+      - "3504"
+      - "-placement-host-address"
+      - "placement:50006"
+      - "-components-path"
+      - "/components"
+    volumes:
+      - ./dapr/components:/components
+    network_mode: "service:exercise-agent"
+    depends_on:
+      - exercise-agent
+      - placement
+
+  # ── SERVICE 5: progress-agent ─────────────────────────────────────────────────
+  progress-agent:
+    build:
+      context: ./progress-agent
+      dockerfile: Dockerfile
+    ports:
+      - "8005:8005"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      DATABASE_URL: postgresql://learnflow:password@postgres:5432/learnflow
+      DAPR_HTTP_PORT: 3505
+      PUBSUB_NAME: pubsub
+      SERVICE_PORT: 8005
+      STRUGGLE_THRESHOLD: 3
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  progress-agent-dapr:
+    image: daprio/daprd:1.13.0
+    command:
+      - "./daprd"
+      - "-app-id"
+      - "progress-agent"
+      - "-app-port"
+      - "8005"
+      - "-dapr-http-port"
+      - "3505"
+      - "-placement-host-address"
+      - "placement:50006"
+      - "-components-path"
+      - "/components"
+    volumes:
+      - ./dapr/components:/components
+    network_mode: "service:progress-agent"
+    depends_on:
+      - progress-agent
+      - placement
+
+volumes:
+  postgres_data:
