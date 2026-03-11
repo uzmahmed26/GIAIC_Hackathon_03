@@ -17,6 +17,9 @@ function demoReply(message: string): string {
   if (m.includes("debug") || m.includes("error") || m.includes("fix"))
     return `Sure! Paste your code in the **Code Editor** tab and click **🔍 Analyze** — I'll review it for bugs and suggest fixes.\n\nOr share the code and error message here and I'll help you debug it step by step.`;
 
+  if (m.includes("quiz"))
+    return `Here's a quick quiz on Python! 🎯\n\n**Question 1:** What does this print?\n\`\`\`python\nmy_list = [1, 2, 3]\nprint(my_list[-1])\n\`\`\`\nA) 1  B) 3  C) Error  D) -1\n\n**Question 2:** Which creates a dictionary?\nA) \`[1, 2, 3]\`  B) \`{1, 2, 3}\`  C) \`{"a": 1}\`  D) \`(1, 2, 3)\`\n\n**Question 3:** What is \`len("hello")\`?\nA) 4  B) 5  C) 6  D) Error\n\n> Answers: 1-B, 2-C, 3-B\n\nWant more questions or a deeper dive into any topic?`;
+
   if (m.includes("list") || m.includes("exercise"))
     return `Here's a list exercise for you:\n\n**Task:** Write a function that takes a list of numbers and returns only the even ones.\n\n\`\`\`python\ndef even_numbers(nums: list[int]) -> list[int]:\n    # your code here\n    pass\n\nprint(even_numbers([1, 2, 3, 4, 5, 6]))  # [2, 4, 6]\n\`\`\`\n\nHint: use a list comprehension with \`% 2 == 0\`. Give it a try!`;
 
@@ -48,7 +51,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required field: message" }, { status: 400 });
   }
 
-  // Try the real backend first
+  // Try the real backend first — only use response if 2xx
   try {
     const res = await fetch(`${BACKEND_URL}/chat`, {
       method: "POST",
@@ -57,8 +60,11 @@ export async function POST(req: NextRequest) {
       signal: AbortSignal.timeout(10_000),
     });
 
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    if (res.ok) {
+      const data = await res.json();
+      return NextResponse.json(data);
+    }
+    // Non-2xx (e.g. 502 when LLM key missing) → fall through to demo
   } catch {
     // Backend unreachable — fall through to demo mode
   }
