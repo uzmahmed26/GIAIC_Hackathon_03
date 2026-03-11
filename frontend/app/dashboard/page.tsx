@@ -32,11 +32,15 @@ const ACTIVITY_ICONS: Record<string, string> = {
 
 export default function DashboardPage() {
   const [firstName, setFirstName] = useState("Student");
+  const [userStats, setUserStats] = useState({ streak: 7, xp: 2450, level: "Intermediate" });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const user = getSession();
-    if (user) setFirstName(user.name.split(" ")[0]);
+    if (user) {
+      setFirstName(user.name.split(" ")[0]);
+      setUserStats({ streak: user.streak, xp: user.xp, level: user.level });
+    }
     fetchProgress(user?.id ?? "user-001")
       .catch(() => { /* fallback to mock data silently */ })
       .finally(() => setIsLoading(false));
@@ -63,19 +67,19 @@ export default function DashboardPage() {
           <div className="shrink-0 text-3xl md:text-4xl">🎓</div>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-3 text-xs" style={{ color: "#6c7086" }}>
-          <span>🔥 {user?.streak ?? 7}-day streak</span>
-          <span>⚡ {user?.xp?.toLocaleString() ?? "2,450"} XP</span>
-          <span>📊 {user?.level ?? "Intermediate"}</span>
+          <span>🔥 {userStats.streak}-day streak</span>
+          <span>⚡ {userStats.xp.toLocaleString()} XP</span>
+          <span>📊 {userStats.level}</span>
         </div>
       </div>
 
       {/* Stats row */}
       <div className="grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-4">
         {[
-          { label: "Total XP", value: user?.xp?.toLocaleString() ?? "2,450", icon: "⚡", color: "#f9e2af", bg: "rgba(249,226,175,0.1)" },
-          { label: "Streak", value: `${user?.streak ?? 7} days`, icon: "🔥", color: "#fab387", bg: "rgba(250,179,135,0.1)" },
+          { label: "Total XP", value: userStats.xp.toLocaleString(), icon: "⚡", color: "#f9e2af", bg: "rgba(249,226,175,0.1)" },
+          { label: "Streak", value: `${userStats.streak} days`, icon: "🔥", color: "#fab387", bg: "rgba(250,179,135,0.1)" },
           { label: "Exercises", value: "25", icon: "📝", color: "#a6e3a1", bg: "rgba(166,227,161,0.1)" },
-          { label: "Level", value: user?.level ?? "Intermediate", icon: "🎖", color: "#89b4fa", bg: "rgba(137,180,250,0.1)" },
+          { label: "Level", value: userStats.level, icon: "🎖", color: "#89b4fa", bg: "rgba(137,180,250,0.1)" },
         ].map((stat) => (
           <div key={stat.label} className="rounded-2xl border p-3 md:p-4 transition-all hover:border-indigo-500/40" style={{ background: "#181825", borderColor: "#313244" }}>
             <div className="mb-1.5 flex items-center justify-between">
