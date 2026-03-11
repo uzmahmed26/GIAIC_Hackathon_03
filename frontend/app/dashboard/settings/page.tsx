@@ -1,11 +1,20 @@
 "use client";
-import { useState } from "react";
-import { getSession, getAvatarInitials } from "@/src/lib/auth";
+import { useState, useEffect } from "react";
+import { getSession, getAvatarInitials } from "@/src/lib/auth"; // getAvatarInitials used in useEffect
 
 export default function SettingsPage() {
-  const user = getSession();
-  const [name, setName] = useState(user?.name ?? "");
-  const [email, setEmail] = useState(user?.email ?? "");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [avatarInitials, setAvatarInitials] = useState("?");
+
+  useEffect(() => {
+    const user = getSession();
+    if (user) {
+      setName(user.name);
+      setEmail(user.email);
+      setAvatarInitials(getAvatarInitials(user.name));
+    }
+  }, []);
   const [saved, setSaved] = useState(false);
 
   function handleSave() {
@@ -24,11 +33,11 @@ export default function SettingsPage() {
         <h2 className="mb-4 text-base font-semibold" style={{ color: "#cdd6f4" }}>Profile</h2>
         <div className="mb-5 flex items-center gap-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl text-xl font-bold text-white" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
-            {getAvatarInitials(name || "?")}
+            {avatarInitials}
           </div>
           <div>
             <p className="text-sm font-semibold" style={{ color: "#cdd6f4" }}>{name}</p>
-            <p className="text-xs" style={{ color: "#6c7086" }}>{user?.role}</p>
+            <p className="text-xs" style={{ color: "#6c7086" }}>student</p>
           </div>
         </div>
         <div className="space-y-4">

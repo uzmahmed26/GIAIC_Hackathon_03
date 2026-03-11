@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getSession, logout, getAvatarInitials } from "@/src/lib/auth";
+import type { User } from "@/src/lib/types";
 
 const BREADCRUMB_MAP: Record<string, string[]> = {
   "/dashboard": ["Dashboard"],
@@ -22,8 +23,12 @@ const NOTIFICATIONS = [
 export default function DashboardHeader({ onMenuClick }: { onMenuClick?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
-  const user = getSession();
+  const [user, setUser] = useState<User | null>(null);
   const [dark, setDark] = useState(true);
+
+  useEffect(() => {
+    setUser(getSession());
+  }, []);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [unread, setUnread] = useState(NOTIFICATIONS.filter((n) => !n.read).length);

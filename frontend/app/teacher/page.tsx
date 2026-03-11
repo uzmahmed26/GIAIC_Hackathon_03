@@ -27,7 +27,7 @@ const SEVERITY_COLORS: Record<string, string> = {
 
 export default function TeacherPage() {
   const router = useRouter();
-  const user = getSession();
+  const [userName, setUserName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "mastery" | "lastActive">("mastery");
   const [showGenerateModal, setShowGenerateModal] = useState(false);
@@ -39,10 +39,13 @@ export default function TeacherPage() {
   const [generated, setGenerated] = useState(false);
 
   useEffect(() => {
+    const user = getSession();
     if (!user || user.role !== "teacher") {
       router.replace("/login");
+    } else {
+      setUserName(user.name);
     }
-  }, [user, router]);
+  }, [router]);
 
   const filtered = STUDENTS
     .filter((s) => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -126,7 +129,7 @@ export default function TeacherPage() {
           <button onClick={() => setShowGenerateModal(true)} className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all" style={{ background: "#6366f1" }} onMouseEnter={(e) => (e.currentTarget.style.background = "#4f46e5")} onMouseLeave={(e) => (e.currentTarget.style.background = "#6366f1")}>
             ✨ Generate Exercise
           </button>
-          <span className="text-sm font-medium" style={{ color: "#a6adc8" }}>{user?.name}</span>
+          <span className="text-sm font-medium" style={{ color: "#a6adc8" }}>{userName}</span>
           <button onClick={() => { logout(); router.push("/login"); }} className="text-xs transition-all" style={{ color: "#6c7086" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#f38ba8")} onMouseLeave={(e) => (e.currentTarget.style.color = "#6c7086")}>Sign out</button>
         </div>
       </header>

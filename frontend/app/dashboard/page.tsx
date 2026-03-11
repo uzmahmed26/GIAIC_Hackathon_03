@@ -31,16 +31,16 @@ const ACTIVITY_ICONS: Record<string, string> = {
 };
 
 export default function DashboardPage() {
-  const user = getSession();
-  const firstName = user?.name?.split(" ")[0] ?? "Student";
+  const [firstName, setFirstName] = useState("Student");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Simulate async data fetch with real API attempt
   useEffect(() => {
+    const user = getSession();
+    if (user) setFirstName(user.name.split(" ")[0]);
     fetchProgress(user?.id ?? "user-001")
       .catch(() => { /* fallback to mock data silently */ })
       .finally(() => setIsLoading(false));
-  }, [user?.id]);
+  }, []);
 
   if (isLoading) return <DashboardSkeleton />;
 
