@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { getSession, logout, getAvatarInitials } from "@/src/lib/auth";
+import type { User } from "@/src/lib/types";
 import { MODULES } from "@/src/lib/mock-data";
 
 const NAV_ITEMS = [
@@ -18,7 +20,11 @@ const currentModule = MODULES.find((m) => m.status === "in-progress") ?? MODULES
 export default function DashboardSidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
-  const user = getSession();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    setUser(getSession());
+  }, []);
 
   function handleLogout() {
     logout();
