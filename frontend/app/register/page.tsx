@@ -11,6 +11,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"student" | "teacher">("student");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -54,7 +55,7 @@ export default function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                placeholder="Maya Chen"
+                placeholder="Your full name"
                 className="w-full rounded-xl px-4 py-3 text-base outline-none sm:text-sm"
                 style={inputStyle}
                 onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
@@ -79,19 +80,32 @@ export default function RegisterPage() {
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium" style={{ color: "#a6adc8" }}>Password</label>
-              <input
-                type="password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                placeholder="Min. 6 characters"
-                className="w-full rounded-xl px-4 py-3 text-base outline-none sm:text-sm"
-                style={inputStyle}
-                onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
-                onBlur={(e) => (e.target.style.borderColor = "#45475a")}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  placeholder="Min. 6 characters"
+                  className="w-full rounded-xl px-4 py-3 pr-11 text-base outline-none sm:text-sm"
+                  style={inputStyle}
+                  onFocus={(e) => (e.target.style.borderColor = "#6366f1")}
+                  onBlur={(e) => (e.target.style.borderColor = "#45475a")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-sm"
+                  style={{ color: "#6c7086" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#a6adc8")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#6c7086")}
+                  tabIndex={-1}
+                >
+                  {showPassword ? "🙈" : "👁"}
+                </button>
+              </div>
             </div>
 
             {/* Role selector */}
