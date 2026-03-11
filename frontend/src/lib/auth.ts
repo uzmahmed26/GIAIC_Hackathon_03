@@ -5,8 +5,8 @@ const SESSION_KEY = "learnflow_session";
 export const MOCK_USERS: User[] = [
   {
     id: "student-001",
-    name: "Maya Chen",
-    email: "maya@example.com",
+    name: "Uzma Ahmed",
+    email: "uzma@example.com",
     role: "student",
     xp: 2450,
     streak: 7,

@@ -364,7 +364,7 @@ export const CHAT_SESSIONS: ChatSession[] = [
 ];
 
 export const STUDENTS: Student[] = [
-  { id: "s-001", name: "Maya Chen", email: "maya@example.com", module: 3, mastery: 68, lastActive: new Date(Date.now() - 1000 * 60 * 30), status: "on-track", streak: 7 },
+  { id: "s-001", name: "Uzma Ahmed", email: "uzma@example.com", module: 3, mastery: 68, lastActive: new Date(Date.now() - 1000 * 60 * 30), status: "on-track", streak: 7 },
   { id: "s-002", name: "Liam Patel", email: "liam@example.com", module: 2, mastery: 45, lastActive: new Date(Date.now() - 1000 * 60 * 60 * 2), status: "struggling", streak: 1 },
   { id: "s-003", name: "Sofia Garcia", email: "sofia@example.com", module: 5, mastery: 82, lastActive: new Date(Date.now() - 1000 * 60 * 15), status: "on-track", streak: 14 },
   { id: "s-004", name: "Noah Kim", email: "noah@example.com", module: 1, mastery: 30, lastActive: new Date(Date.now() - 1000 * 60 * 60 * 72), status: "inactive", streak: 0 },
