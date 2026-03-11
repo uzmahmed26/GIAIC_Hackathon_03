@@ -18,8 +18,10 @@ export async function GET(
       headers: { "Content-Type": "application/json" },
       signal: AbortSignal.timeout(8_000),
     });
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    if (res.ok) {
+      const data = await res.json();
+      return NextResponse.json(data);
+    }
   } catch {
     // Demo mode fallback
   }

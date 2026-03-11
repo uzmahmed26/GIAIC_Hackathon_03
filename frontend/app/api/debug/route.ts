@@ -90,8 +90,10 @@ export async function POST(req: NextRequest) {
       signal: AbortSignal.timeout(10_000),
     });
 
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    if (res.ok) {
+      const data = await res.json();
+      return NextResponse.json(data);
+    }
   } catch {
     // Backend unreachable — fall through to demo analysis
   }

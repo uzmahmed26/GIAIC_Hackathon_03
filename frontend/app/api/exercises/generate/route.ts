@@ -35,8 +35,10 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({ topic, difficulty, module: mod, quantity }),
       signal: AbortSignal.timeout(15_000),
     });
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    if (res.ok) {
+      const data = await res.json();
+      return NextResponse.json(data);
+    }
   } catch {
     // Demo mode — return stub exercises
   }
