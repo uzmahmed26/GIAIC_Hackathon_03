@@ -207,7 +207,7 @@ export default function ChatPage() {
             >
               <div className="flex items-center justify-between">
                 <span className="truncate text-xs font-medium" style={{ color: "#cdd6f4" }}>{s.title}</span>
-                <span className="ml-2 shrink-0 text-[10px]" style={{ color: "#6c7086" }}>{formatSessionDate(s.timestamp)}</span>
+                <span className="ml-2 shrink-0 text-[10px]" style={{ color: "#6c7086" }} suppressHydrationWarning>{formatSessionDate(s.timestamp)}</span>
               </div>
               {s.lastMessage && (
                 <p className="mt-0.5 truncate text-[11px]" style={{ color: "#6c7086" }}>{s.lastMessage}</p>
@@ -230,7 +230,7 @@ export default function ChatPage() {
                     <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: agent.bg, color: agent.color }}>
                       {agent.icon} {agent.label}
                     </span>
-                    <span className="text-[11px]" style={{ color: "#45475a" }}>{formatTime(msg.timestamp)}</span>
+                    <span className="text-[11px]" style={{ color: "#45475a" }} suppressHydrationWarning>{formatTime(msg.timestamp)}</span>
                   </div>
                 )}
                 <div className="group flex flex-col gap-1" style={{ maxWidth: "75%" }}>
@@ -245,7 +245,7 @@ export default function ChatPage() {
                     {renderContent(msg.content)}
                   </div>
                   {msg.role === "user" && (
-                    <span className="self-end text-[11px]" style={{ color: "#45475a" }}>{formatTime(msg.timestamp)}</span>
+                    <span className="self-end text-[11px]" style={{ color: "#45475a" }} suppressHydrationWarning>{formatTime(msg.timestamp)}</span>
                   )}
                   {msg.role === "assistant" && (
                     <div className="flex items-center gap-1 px-1 opacity-0 group-hover:opacity-100 transition-opacity">

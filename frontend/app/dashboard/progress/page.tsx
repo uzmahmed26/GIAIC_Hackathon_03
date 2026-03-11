@@ -253,7 +253,7 @@ export default function ProgressPage() {
               <p className="text-sm font-semibold" style={{ color: "#cdd6f4" }}>{a.title}</p>
               <p className="text-[11px]" style={{ color: "#6c7086" }}>{a.description}</p>
               {a.unlocked && a.unlockedAt && (
-                <span className="text-[10px]" style={{ color: "#45475a" }}>
+                <span className="text-[10px]" style={{ color: "#45475a" }} suppressHydrationWarning>
                   {a.unlockedAt.toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })}
                 </span>
               )}
